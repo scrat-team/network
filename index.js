@@ -1,5 +1,4 @@
-/*jshint eqnull: true, browser: true */
-
+/*jshint eqnull: true, browser: true, latedef: false */
 'use strict';
 
 var _ = require('lang'),
