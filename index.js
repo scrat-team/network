@@ -1,7 +1,9 @@
 /*jshint eqnull: true, browser: true, latedef: false */
 'use strict';
 
-var _ = require('lang'),
+var detect = require('type'),
+    each = require('each'),
+    extend = require('extend'),
     Promise = require('event').Promise,
     id = 0,
     slice = Array.prototype.slice,
@@ -19,26 +21,33 @@ var _ = require('lang'),
 
 function empty() {}
 
+function bind(func, context) {
+    var args = slice.call(arguments, 2);
+    return function () {
+        return func.apply(context, args.concat(slice.call(arguments)));
+    };
+}
+
 exports.ping = function (url, params) {
     var img = new Image();
-    params = _.extend({
+    params = extend({
         _tm: +new Date()
     }, params);
     img.src = param(params, url);
 };
 
-_.each(['get', 'post', 'put', 'delete'], function (m) {
+each(['get', 'post', 'put', 'delete'], function (m) {
     exports[m] = function () {
-        return ajax(_.extend(createOptions(arguments), {type: m}));
+        return ajax(extend(createOptions(arguments), {type: m}));
     };
 });
 
 exports.getJSON = function () {
-    return ajax(_.extend(createOptions(arguments), {dataType: 'json'}));
+    return ajax(extend(createOptions(arguments), {dataType: 'json'}));
 };
 
 exports.getXML = function () {
-    return ajax(_.extend(createOptions(arguments), {dataType: 'xml'}));
+    return ajax(extend(createOptions(arguments), {dataType: 'xml'}));
 };
 
 exports.sendForm = function () {
@@ -50,7 +59,7 @@ exports.sendForm = function () {
         fd = new FormData(f);
         params.unshift(f.action || location.href);
 
-        options = _.extend(createOptions(params), {
+        options = extend(createOptions(params), {
             type: f.method || 'post',
             data: fd
         });
@@ -62,7 +71,7 @@ exports.sendForm = function () {
 
 exports.sendFile = function () {
     var options = createOptions(arguments);
-    return ajax(_.extend(options, {
+    return ajax(extend(options, {
         type: 'post',
         headers: {'X-File-Name': options.data.name}
     }));
@@ -75,7 +84,7 @@ jsonp = exports.jsonp = function () {
         },
         callbackName = 'elf_jsonp_' + xhr.id,
         script = document.createElement('script'),
-        settings = xhr.ajaxSettings = _.extend({}, defaults, options),
+        settings = xhr.ajaxSettings = extend({}, defaults, options),
         url = settings.url,
         promise = xhr.promise = new Promise(),
         oldAlways = promise.always;
@@ -87,8 +96,8 @@ jsonp = exports.jsonp = function () {
         });
     };
 
-    _.each(['done', 'fail', 'always', 'resolve', 'reject'], function (m) {
-        xhr[m] = _.bind(promise[m], promise);
+    each(['done', 'fail', 'always', 'resolve', 'reject'], function (m) {
+        xhr[m] = bind(promise[m], promise);
     });
 
     // 清理 JSONP Callback 函数
@@ -140,7 +149,7 @@ ajax = exports.ajax = function (options) {
     var xhr = new XMLHttpRequest(),
         upload = xhr.upload,
         tmp,
-        settings = _.extend({}, defaults, options),
+        settings = extend({}, defaults, options),
         type = settings.type = settings.type.toLowerCase(),
         data = settings.data,
         hasParam = false,
@@ -157,32 +166,32 @@ ajax = exports.ajax = function (options) {
             fn(xhr);
         });
     };
-    _.each(['done', 'fail', 'always', 'resolve', 'reject'], function (m) {
-        xhr[m] = _.bind(promise[m], promise);
+    each(['done', 'fail', 'always', 'resolve', 'reject'], function (m) {
+        xhr[m] = bind(promise[m], promise);
     });
 
     // 处理 options.data
-    _.each(data, function () {
+    each(data, function () {
         hasParam = true;
     });
 
-    if (!hasParam && _.type(data) !== 'string') {
+    if (!hasParam && detect(data) !== 'string') {
         delete settings.data;
         data = settings.data;
     }
 
     if (typeof data === 'object' &&
-        _.type(data) !== 'formdata' &&
-        _.type(data) !== 'file') {
+        detect(data) !== 'formdata' &&
+        detect(data) !== 'file') {
 
         if (type === 'get') {
             settings.url = param(data, settings.url);
             data = settings.data = null;
         } else {
             tmp = new FormData();
-            _.each(data, function (value, key) {
+            each(data, function (value, key) {
                 tmp.append(key,
-                    _.type(value) === 'array' ? value.join() : value);
+                    detect(value) === 'array' ? value.join() : value);
             });
             data = settings.data = tmp;
         }
@@ -225,7 +234,7 @@ param = exports.param = function (data, appendTo) {
     var stack = [],
         query;
 
-    _.each(data, function (value, key) {
+    each(data, function (value, key) {
         stack.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
     });
     query = stack.join('&').replace(/%20/g, '+');
@@ -241,7 +250,7 @@ param = exports.param = function (data, appendTo) {
 
 // 设置默认选项
 exports.setDefaultOptions = function (options) {
-    _.each(options, function (value, key) {
+    each(options, function (value, key) {
         switch (key) {
         case 'success':
             exports.setDefaultSuccess(value);
@@ -344,7 +353,7 @@ function createOptions(args) {
             break;
         case 'object':
             if (foundData) {
-                _.extend(options, p);
+                extend(options, p);
             } else {
                 options.data = p;
                 foundData = true;
@@ -380,7 +389,7 @@ function addHeaders(xhr, dataType, headers) {
     xhr.setRequestHeader('Accept', accept);
 
     if (typeof headers === 'object') {
-        _.each(headers, function (value, key) {
+        each(headers, function (value, key) {
             xhr.setRequestHeader(key, value);
         });
     }
