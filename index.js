@@ -102,7 +102,9 @@ jsonp = exports.jsonp = function () {
 
     // 清理 JSONP Callback 函数
     xhr.abort = function () {
-        script.parentNode.removeChild(script);
+        if(script && script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
         if (callbackName in window) {
             window[callbackName] = null;
         }
