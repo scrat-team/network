@@ -404,12 +404,14 @@ function success(xhr, data) {
 }
 
 function error(xhr, msg) {
+    if (xhr._aborted) return;
     var handler = getError(xhr),
         args;
     msg = typeof msg === 'string' ? msg : xhr.statusText;
     args = [xhr, msg, xhr.status];
     handler.apply(xhr, args);
     xhr.reject.apply(xhr, args);
+    xhr._aborted = true;
 }
 
 // 返回错误处理函数
