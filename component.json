@@ -2,7 +2,7 @@
   "name": "network",
   "repo": "scrat-team/network",
   "description": "An AJAX module with JSONP support",
-  "version": "0.1.0",
+  "version": "0.1.0-1",
   "keywords": ["network", "ajax", "jsonp"],
   "scripts": ["index.js"],
   "dependencies": {

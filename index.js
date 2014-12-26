@@ -310,11 +310,11 @@ function onReadyStateChange(e) {
                 default:
                     resBody = resText;
                 }
-                success(xhr, resBody);
             } catch (err) {
                 error(xhr, 'parsererror');
                 throw err;
             }
+            success(xhr, resBody);
         } else {
             error(xhr);
         }
