@@ -103,7 +103,7 @@ jsonp = exports.jsonp = function () {
     // 清理 JSONP Callback 函数
     xhr.abort = function () {
         if(script && script.parentNode) {
-          script.parentNode.removeChild(script);
+            script.parentNode.removeChild(script);
         }
         if (callbackName in window) {
             window[callbackName] = null;
@@ -276,8 +276,10 @@ exports.setDefaultSuccess = function (onSuccess) {
 
 // 设置默认错误处理函数
 exports.setDefaultError = function (onError) {
-    defaults.onError =
-        typeof onError === 'function' ? onError : null;
+    defaults.onError = typeof onError === 'function' ? onError :
+        function (e) {
+            throw e;
+        };
     return this;
 };
 
@@ -299,20 +301,19 @@ function onReadyStateChange(e) {
         }
 
         if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
-            try {
-                switch (dataType.toLowerCase()) {
-                case 'json':
+            switch (dataType.toLowerCase()) {
+            case 'json':
+                try {
                     resBody = JSON.parse(resText);
-                    break;
-                case 'xml':
-                    resBody = xhr.responseXML;
-                    break;
-                default:
-                    resBody = resText;
+                } catch (err) {
+                    return error(xhr, err.message);
                 }
-            } catch (err) {
-                error(xhr, 'parsererror');
-                throw err;
+                break;
+            case 'xml':
+                resBody = xhr.responseXML;
+                break;
+            default:
+                resBody = resText;
             }
             success(xhr, resBody);
         } else {
