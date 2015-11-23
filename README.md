@@ -1,4 +1,4 @@
-network
+network (DEPRECIATED use [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) instead)
 =======
 
 network 模块返回一个对象，提供了一系列发送 AJAX 请求的方法和配置。
