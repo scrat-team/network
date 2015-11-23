@@ -152,7 +152,7 @@ ajax = exports.ajax = function (options) {
         upload = xhr.upload,
         tmp,
         settings = extend({}, defaults, options),
-        type = settings.type = settings.type.toLowerCase(),
+        type = settings.type,
         data = settings.data,
         hasParam = false,
         progress = settings.progress,
@@ -186,7 +186,7 @@ ajax = exports.ajax = function (options) {
         detect(data) !== 'formdata' &&
         detect(data) !== 'file') {
 
-        if (type === 'get') {
+        if (type.toLowerCase() === 'get') {
             settings.url = param(data, settings.url);
             data = settings.data = null;
         } else {
